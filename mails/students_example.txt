@@ -1,0 +1,4 @@
+3a ole@nordmann.no
+3b person@example.com
+1a parent@something.com
+1a siri@example.com
