@@ -13,7 +13,7 @@ sch_pass: str = os.environ.get('SCH_PASS')
 # which sender we are looking for and from which date we are looking
 sender: str = "saman"
 date: datetime.datetime = datetime.datetime.now()
-four_days_ago: datetime.datetime = date - datetime.timedelta(minutes=5)
+four_days_ago: datetime.datetime = date - datetime.timedelta(days=4)
 
 # what imap and smtp server we are using
 imap_server: str = 'imap.gmail.com'
