@@ -13,7 +13,7 @@ sch_pass: str = os.environ.get('SCH_PASS')
 # which sender we are looking for and from which date we are looking
 sender: str = "saman"
 date: datetime.datetime = datetime.datetime.now()
-four_days_ago: datetime.datetime = date - datetime.timedelta(days=4)
+four_days_ago: datetime.datetime = date - datetime.timedelta(days=2)
 
 # what imap and smtp server we are using
 imap_server: str = 'imap.gmail.com'
@@ -41,9 +41,9 @@ Salahaddin skoleadministrasjon
 
     # check if we need to retrieve from student mails or teacher mails
     if student:
-        mail_file = open('mails/students.txt', 'r')
+        mail_file = open('mails/t_students.txt', 'r')
     else:
-        mail_file = open('mails/teachers.txt', 'r')
+        mail_file = open('mails/t_teachers.txt', 'r')
 
     # parsing through the mails, sending to mail from corresponding classroom
     mail_list = mail_file.read().split('\n')
@@ -53,13 +53,11 @@ Salahaddin skoleadministrasjon
         if cr.lower() == classroom.lower():
             bcc_addresses.append(ml)
 
-    # converting bcc addressess to be usable
-    bcc_addresses = ', '.join(bcc_addresses)
-
+    print(bcc_addresses)
     # sending the mail
     with smtplib.SMTP_SSL(smtp_server, 465) as smtp:
         smtp.login(sch_user, sch_pass)
-        smtp.send_message(msg, to_addrs=[bcc_addresses])
+        smtp.send_message(msg, to_addrs=bcc_addresses)
 
 
 # mail server i am connecting to is outlook/hotmail
