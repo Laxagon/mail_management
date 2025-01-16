@@ -13,7 +13,7 @@ sch_pass: str = os.environ.get('SCH_PASS')
 # which sender we are looking for and from which date we are looking
 sender: str = "saman"
 date: datetime.datetime = datetime.datetime.now()
-four_days_ago: datetime.datetime = date - datetime.timedelta(days=2)
+two_days_ago: datetime.datetime = date - datetime.timedelta(days=2)
 
 # what imap and smtp server we are using
 imap_server: str = 'imap.gmail.com'
@@ -25,7 +25,7 @@ def send_mail(file_data, file_name: str, classroom: str, week_num: int, student:
     # create a mail
     msg = EmailMessage()
     msg['Subject'] = f'Ukeplannr. {week_num} for klasse {classroom}'
-    msg['From'] = sch_user
+    msg['From'] = 'Salahaddin Skole'
     msg['To'] = 'undisclosed-recipients:;'
 
     msg.set_content(f"""\
@@ -41,9 +41,9 @@ Salahaddin skoleadministrasjon
 
     # check if we need to retrieve from student mails or teacher mails
     if student:
-        mail_file = open('mails/t_students.txt', 'r')
+        mail_file = open('mails/students.txt', 'r')
     else:
-        mail_file = open('mails/t_teachers.txt', 'r')
+        mail_file = open('mails/teachers.txt', 'r')
 
     # parsing through the mails, sending to mail from corresponding classroom
     mail_list = mail_file.read().split('\n')
@@ -53,7 +53,6 @@ Salahaddin skoleadministrasjon
         if cr.lower() == classroom.lower():
             bcc_addresses.append(ml)
 
-    print(bcc_addresses)
     # sending the mail
     with smtplib.SMTP_SSL(smtp_server, 465) as smtp:
         smtp.login(sch_user, sch_pass)
@@ -68,18 +67,18 @@ imap.login(sch_user, sch_pass)
 
 # looking for mails from sender within the last 5 days in the inbox category
 imap.select("Inbox")
-formatted = four_days_ago.strftime('%d-%b-%Y')
+formatted = two_days_ago.strftime('%d-%b-%Y')
 status, tot_msgs = imap.search(None, f'FROM "{sender}" SINCE {formatted}')
 
 # if it finds a mail that matches the criteria
 if status == 'OK':
-    print("scanning mail...\n")
+    print("scanner mail...\n")
     # the latest mail
 
     # we should be matching with excactly 2 mails
     tot_mails = len(tot_msgs[0].split())
     if tot_mails != 2:
-        print(f"Wrong number of mails found: {tot_mails}, should be 2.")
+        print(f"{tot_mails} mails funnet, burde være 2.")
         # closing and logging out for safe measure
         imap.close()
         imap.logout()
@@ -96,6 +95,9 @@ if status == 'OK':
 
         # see if its weekly schedule for teachers or studfents
         sub_list = decoded_subject[0][0].split()
+        if len(sub_list) != 3:
+            print("Det er noe galt med emnet")
+            os._exit(1)
         student = False
         elev = sub_list[1].lower()
         if elev == 'elev':
@@ -117,13 +119,13 @@ if status == 'OK':
 
                 # send the schedule to the relevant people
                 file_data = part.get_payload(decode=True)
-                print(f'sending {file_name}...')
+                print(f'Sender {file_name}...')
                 send_mail(file_data, file_name, classroom, week_num, student)
-                print(f'{file_name} sendt successfully!\n')
+                print(f'{file_name} sendt!\n')
 
 
 else:
-    print("Did not find the e-mails")
+    print("Fant ingen e-mail")
 
 # closing and logging out for safe measure
 imap.close()
